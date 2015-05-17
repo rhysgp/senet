@@ -7,4 +7,9 @@ package com.rhyssoft.senet.play
 /**
  * Represents a move played.
  */
-case class Move(pieceAtPosition: Int, spaces: Int)
+
+sealed trait Move
+
+case object NullMove extends Move
+
+case class PieceMove(pieceAtPosition: Int, spaces: Int) extends Move
