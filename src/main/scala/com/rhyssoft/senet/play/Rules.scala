@@ -56,9 +56,37 @@ object Rules {
   }
 
   def validate(move: Move, board: Board): Boolean = {
+
+    move match {
+      case PieceMove(position, spaces) =>
+        val movingPieceOpt = board.pieceAt(position)
+        val targetOpt = board.pieceAt(position + spaces)
+        /*
+         * 1. There's a piece at the point in the move:
+         */
+        movingPieceOpt.isDefined &&
+          /*
+           * 2. The target space is occupied either by nothing or by a piece of the opposite type:
+           */
+          (targetOpt.isEmpty || !areSameType(targetOpt, movingPieceOpt) &&
+          /*
+           * 3. The target is defined and not accompanied by another piece of the same type (before or after):
+           */
+          (targetOpt.isDefined && !areSameType(targetOpt, movingPieceOpt))
+      case _ => true
+    }
+
     /*
-     * 1.
+     * 1. Can't move a piece onto a piece of the same type.
      */
-    true
+
+//    board.pieceAt()
+
+//    true
   }
+
+  private def areSameType(p1: Option[Piece], p2: Option[Piece]): Boolean = {
+    p1.get.getClass == p2.get.getClass
+  }
+
 }
