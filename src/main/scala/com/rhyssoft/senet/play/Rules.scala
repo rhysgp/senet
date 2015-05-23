@@ -4,7 +4,7 @@
 
 package com.rhyssoft.senet.play
 
-import com.rhyssoft.senet.state.{Reel, Cone, Board}
+import com.rhyssoft.senet.state.{Piece, Reel, Cone, Board}
 
 /**
  * The rules of the game.
@@ -32,9 +32,26 @@ object Rules {
 
   def play(move: Move, board: Board): Option[Board] = {
     if (validate(move, board)) {
-      Some(Board(Nil))
+      Some(moveIt(move, board))
     } else {
       None
+    }
+  }
+
+  private[play] def moveIt(move: Move, board: Board): Board = {
+    move match {
+      case PieceMove(pieceAtPos, spaces) =>
+        val piecesOpts = board.pieces.map(Some(_): Option[Piece])
+        val unaffectedPieces =
+          piecesOpts.filter(p => p.get.position != pieceAtPos && p.get.position != pieceAtPos + spaces).toList
+        val pieceOpt: Option[Piece] = board.pieceAt(pieceAtPos).map(_.move(spaces))
+        val dancedPieceOpt: Option[Piece] = board.pieceAt(pieceAtPos + spaces).map(_.move(-spaces))
+        val sorted = (pieceOpt :: dancedPieceOpt :: unaffectedPieces)
+          .flatten
+          .sortBy(_.position)
+        Board(sorted)
+      case NullMove =>
+        board
     }
   }
 

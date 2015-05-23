@@ -9,11 +9,22 @@ package com.rhyssoft.senet.state
  * @author Rhys Parsons
  */
 
-sealed trait Piece {}
+sealed trait Piece {
+  def position: Int
+  def move(spaces: Int): Piece
+}
 
-case class Cone(position: Int) extends Piece {}
+case class Cone(position: Int) extends Piece {
+  def move(spaces: Int) = this.copy(position = position + spaces)
+}
 
-case class Reel(position: Int) extends Piece {}
+case class Reel(position: Int) extends Piece {
+  def move(spaces: Int) = this.copy(position = position + spaces)
+}
 
-case class Board(pieces: Seq[Piece])
+case class Board(pieces: Seq[Piece]) {
+  def pieceAt(position: Int): Option[Piece] = {
+    pieces.find(_.position == position)
+  }
+}
 
