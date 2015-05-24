@@ -61,6 +61,8 @@ object Rules {
       case PieceMove(position, spaces) =>
         val movingPieceOpt = board.pieceAt(position)
         val targetOpt = board.pieceAt(position + spaces)
+        val targetPlus1Opt = board.pieceAt(position + spaces + 1)
+        val targetMinus1Opt = board.pieceAt(position + spaces - 1)
         /*
          * 1. There's a piece at the point in the move:
          */
@@ -68,11 +70,24 @@ object Rules {
           /*
            * 2. The target space is occupied either by nothing or by a piece of the opposite type:
            */
-          (targetOpt.isEmpty || !areSameType(targetOpt, movingPieceOpt) &&
+          (targetOpt.isEmpty || !areSameType(targetOpt, movingPieceOpt)) &&
           /*
-           * 3. The target is defined and not accompanied by another piece of the same type (before or after):
+           * 3. A piece cannot be danced when accompanied by a fellow (either one before or one after):
            */
-          (targetOpt.isDefined && !areSameType(targetOpt, movingPieceOpt))
+          (targetOpt.isEmpty || !(areSameType(targetOpt, targetPlus1Opt) || areSameType(targetOpt, targetMinus1Opt))) &&
+          /*
+           * 4. A piece cannot jump over three consecutive opponent pieces:
+           */
+          board.pieces
+            .filter(p => p.position > position && p.position < position + spaces)
+            .filter(p => !areSameType(p, movingPieceOpt.get))
+            .foldLeft((0, 0))((acc, p) => acc match {
+              case (consecutiveCount, lastPos) =>
+                if (p.position == lastPos + 1)
+                  (consecutiveCount + 1, p.position)
+                else
+                  (1, p.position)
+          })._1 < 3
       case _ => true
     }
 
@@ -86,7 +101,10 @@ object Rules {
   }
 
   private def areSameType(p1: Option[Piece], p2: Option[Piece]): Boolean = {
-    p1.get.getClass == p2.get.getClass
+    p1.isDefined && p2.isDefined && areSameType(p1.get, p2.get)
   }
 
+  private def areSameType(p1: Piece, p2: Piece): Boolean = {
+    p1.getClass == p2.getClass
+  }
 }
