@@ -71,4 +71,18 @@ class RulesSpec extends Specification {
     }
   }
 
+  "When drowning it" should {
+    "be illegal to move any piece but the drowning one" in {
+      val board = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22)))
+      Rules.play(PieceMove(11, 1), board) must beNone
+      Rules.play(PieceMove(2, 6), board) must beNone
+      Rules.play(PieceMove(9, 2), board) must beNone
+    }
+    "be legal for any throw for the drowning piece even if it's not 2 (but the board shouldn't change)" in {
+      val board = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22)))
+      Rules.play(PieceMove(22, 1), board) must beSome[Board]
+      Rules.play(PieceMove(22, 6), board) must beSome[Board]
+      Rules.play(PieceMove(22, 3), board) must beSome[Board]
+    }
+  }
 }
