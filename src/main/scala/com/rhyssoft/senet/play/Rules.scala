@@ -106,7 +106,7 @@ object Rules {
   }
 
   private def playerIsDrowning(piece: Piece, board: Board): Boolean = {
-    board.pieces.filter(areSameType(_, piece)).exists(_.position == SEA_OF_HUMILIATION_POS)
+    board.pieceAt(SEA_OF_HUMILIATION_POS).exists(areSameType(_, piece))
   }
 
   private def pieceIsDrowning(piece: Piece): Boolean = {

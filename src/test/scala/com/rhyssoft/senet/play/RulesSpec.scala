@@ -73,7 +73,7 @@ class RulesSpec extends Specification {
 
   "When drowning it" should {
     "be illegal to move any piece but the drowning one" in {
-      val board = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22)))
+      val board = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22), Reel(27)))
       Rules.play(PieceMove(11, 1), board) must beNone
       Rules.play(PieceMove(2, 6), board) must beNone
       Rules.play(PieceMove(9, 2), board) must beNone
