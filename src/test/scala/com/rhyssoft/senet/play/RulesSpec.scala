@@ -79,10 +79,30 @@ class RulesSpec extends Specification {
       Rules.play(PieceMove(9, 2), board) must beNone
     }
     "be legal for any throw for the drowning piece even if it's not 2 (but the board shouldn't change)" in {
-      val board = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22)))
+      val board = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22), Reel(27)))
       Rules.play(PieceMove(22, 1), board) must beSome[Board]
       Rules.play(PieceMove(22, 6), board) must beSome[Board]
       Rules.play(PieceMove(22, 3), board) must beSome[Board]
+    }
+    "be legal to move the drowning piece on a move of 2" in {
+      val board = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22), Reel(27)))
+      val exppectedBoard = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22), Reel(27)))
+      Rules.play(PieceMove(27, 2), board) must beSome[Board]()
+    }
+    "be illegal to move the drowning piece on a move of anything but 2" in {
+
+    }
+    "move the drowning piece in the next available space when the recovery space is occupied" in {
+
+    }
+    "move the drowning piece in the next available space when the recovery space is occupied x 2" in {
+
+    }
+    "move the drowning piece in the next available space when the recovery space is occupied x 3" in {
+
+    }
+    "move the drowning piece in the next available space when the recovery space is occupied x 4" in {
+
     }
   }
 }
