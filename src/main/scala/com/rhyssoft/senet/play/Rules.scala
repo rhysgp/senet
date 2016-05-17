@@ -42,7 +42,7 @@ object Rules {
   private[play] def moveIt(move: Move, board: Board): Board = {
     move match {
       case PieceMove(pieceAtPos, spaces) =>
-        val piecesOpts = board.pieces.map(Some(_): Option[Piece])
+        val piecesOpts = board.pieces.map(Option(_))
         val unaffectedPieces =
           piecesOpts.filter(p => p.get.position != pieceAtPos && p.get.position != pieceAtPos + spaces).toList
         val pieceOpt: Option[Piece] = board.pieceAt(pieceAtPos).map(_.move(spaces))

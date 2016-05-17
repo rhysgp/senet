@@ -86,23 +86,23 @@ class RulesSpec extends Specification {
     }
     "be legal to move the drowning piece on a move of 2" in {
       val board = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22), Reel(27)))
-      val exppectedBoard = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22), Reel(27)))
-      Rules.play(PieceMove(27, 2), board) must beSome[Board]()
+      val expectedBoard = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22), Reel(27)))
+      Rules.play(PieceMove(27, 2), board) must beSome[Board](expectedBoard)
     }
     "be illegal to move the drowning piece on a move of anything but 2" in {
-
+      ko
     }
     "move the drowning piece in the next available space when the recovery space is occupied" in {
-
+      ko
     }
     "move the drowning piece in the next available space when the recovery space is occupied x 2" in {
-
+      ko
     }
     "move the drowning piece in the next available space when the recovery space is occupied x 3" in {
-
+      ko
     }
     "move the drowning piece in the next available space when the recovery space is occupied x 4" in {
-
+      ko
     }
   }
 }
