@@ -5,6 +5,8 @@ import org.specs2.mutable._
 
 class RulesSpec extends Specification {
 
+  sequential
+
   "Initialising a board" should {
     "produce a board with alternating piece types on the first row, starting with cone" in {
       val boardOpt = Rules.initialBoard(NullMove, Board(Nil))
@@ -78,16 +80,16 @@ class RulesSpec extends Specification {
       Rules.play(PieceMove(2, 6), board) must beNone
       Rules.play(PieceMove(9, 2), board) must beNone
     }
-    "be legal for any throw for the drowning piece even if it's not 2 (but the board shouldn't change)" in {
+    "be legal for any throw for the drowning piece even if it is not 2 (but the board should not change)" in {
       val board = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22), Reel(27)))
-      Rules.play(PieceMove(22, 1), board) must beSome[Board]
-      Rules.play(PieceMove(22, 6), board) must beSome[Board]
-      Rules.play(PieceMove(22, 3), board) must beSome[Board]
+      Rules.play(PieceMove(Rules.SeaOfHumiliation, 1), board) must beSome(board)
+      Rules.play(PieceMove(Rules.SeaOfHumiliation, 6), board) must beSome(board)
+      Rules.play(PieceMove(Rules.SeaOfHumiliation, 3), board) must beSome(board)
     }
     "be legal to move the drowning piece on a move of 2" in {
       val board = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22), Reel(27)))
       val expectedBoard = Board(Seq(Cone(1), Reel(2), Cone(3), Reel(4), Cone(5), Cone(7), Cone(8), Reel(9), Reel(11), Reel(22), Reel(27)))
-      Rules.play(PieceMove(27, 2), board) must beSome[Board](expectedBoard)
+      Rules.play(PieceMove(Rules.SeaOfHumiliation, 2), board) must beSome[Board](expectedBoard)
     }
     "be illegal to move the drowning piece on a move of anything but 2" in {
       ko
