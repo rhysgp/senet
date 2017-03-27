@@ -4,23 +4,23 @@
 
 package com.rhyssoft.senet.state
 
-/**
- * The state.
- * @author Rhys Parsons
- */
+import com.rhyssoft.senet.state.PieceType.PieceType
 
-sealed trait Piece {
-  def position: Int
-  def move(spaces: Int): Piece
+object  PieceType extends Enumeration {
+  type PieceType = Value
+  val Cone, Reel = Value
 }
 
-case class Cone(position: Int) extends Piece {
-  def move(spaces: Int) = this.copy(position = position + spaces)
+case class Piece(position: Int, pieceType: PieceType) {
+
+  def move(spaces: Int) = copy(position = position + spaces)
 }
 
-case class Reel(position: Int) extends Piece {
-  def move(spaces: Int) = this.copy(position = position + spaces)
+object Piece {
+  def cone(pos: Int) = Piece(pos, PieceType.Cone)
+  def reel(pos: Int) = Piece(pos, PieceType.Reel)
 }
+
 
 case class Board(pieces: Seq[Piece]) {
   def pieceAt(position: Int): Option[Piece] = {

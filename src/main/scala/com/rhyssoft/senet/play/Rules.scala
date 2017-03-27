@@ -4,7 +4,7 @@
 
 package com.rhyssoft.senet.play
 
-import com.rhyssoft.senet.state.{Piece, Reel, Cone, Board}
+import com.rhyssoft.senet.state.{Board, Piece}
 
 /**
  * The rules of the game.
@@ -17,20 +17,22 @@ import com.rhyssoft.senet.state.{Piece, Reel, Cone, Board}
  */
 object Rules {
 
+  type Play = (Move, Board) => Option[Board]
+
+
   private val log = TempLogger
 
   private val protectedSpaces = Seq(26, 28, 29)
 
   val SeaOfHumiliation = 27
-  type Play = (Move, Board) => Option[Board]
 
   def initialBoard(move: Move, board: Board): Option[Board] = {
     Some(Board(
       for (pos <- 1 to 10) yield {
         if (pos % 2 == 0)
-          Reel(pos)
+          Piece.reel(pos)
         else
-          Cone(pos)
+          Piece.cone(pos)
       }
     ))
   }
@@ -162,17 +164,9 @@ object Rules {
     piece.position == SeaOfHumiliation
   }
 
-  private def areSameType(p1: Option[Piece], p2: Option[Piece]): Boolean = {
-    p1.isDefined && p2.isDefined && areSameType(p1.get, p2.get)
-  }
+  private def areSameType(p1: Piece, p2: Piece): Boolean = p1.pieceType == p2.pieceType
 
-  private def areSameType(p1: Piece, p2: Piece): Boolean = {
-    p1.getClass == p2.getClass
-  }
-
-  private def areSameType(p1: Piece, p2: Option[Piece]): Boolean = {
-    p2.isDefined && areSameType(p1, p2.get)
-  }
+  private def areSameType(p1: Piece, p2: Option[Piece]): Boolean = p2.isDefined && areSameType(p1, p2.get)
 
   private def isProtected(p: Piece, board: Board): Boolean = {
       protectedSpaces.contains(p.position) ||
@@ -183,7 +177,7 @@ object Rules {
 
   private def rangeContainsTripletOfOpposingType(from: Int, to: Int, movingPiece: Piece, board: Board): Boolean = {
     board.pieces
-      .filter(p => p.getClass != movingPiece.getClass && p.position >= from && p.position <= to)
+      .filter(p => p.pieceType != movingPiece.pieceType && p.position >= from && p.position <= to)
       .map(_.position)
       .foldLeft(Seq[Int]())((r, i) =>
         if (r.length == 3)
@@ -203,6 +197,8 @@ case object Validated extends ValidationResult
 case object ValidatedNoMove extends ValidationResult
 case object NotValidated extends ValidationResult
 
+//sealed trait MoveResult
+//case object Moved(nextPlayer: )
 
 
 object TempLogger {
