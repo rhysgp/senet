@@ -36,10 +36,14 @@ object Rules {
   }
 
   def play(move: Move, board: Board): Option[Board] = {
-    if (validate(move, board)) {
-      Some(moveIt(move, board))
-    } else {
-      None
+
+    validate(move, board) match {
+      case Validated =>
+        Some(moveIt(move, board))
+      case ValidatedNoMove =>
+        Some(board)
+      case NotValidated =>
+        None
     }
   }
 
@@ -60,7 +64,7 @@ object Rules {
     }
   }
 
-  def validate(move: Move, board: Board): Boolean = {
+  def validate(move: Move, board: Board): ValidationResult = {
 
     move match {
       case PieceMove(position, spaces) =>
@@ -72,32 +76,32 @@ object Rules {
           case Some(movingPiece) =>
             if (pieceIsDrowning(movingPiece)) {
               log.debug("Piece is drowning: any throw is valid, but the board may not change.")
-              true
+              ValidatedNoMove
             } else {
 
               // piece is not drowning, continue validation:
               if (playerIsDrowning(movingPieceOpt.get, board)) {
                 log.info("Player is drowning: can't move _that_ piece!")
-                false
+                NotValidated
 
               } else {
                 // is there a piece of the same type in the target?
                 if (targetOpt.isDefined && areSameType(movingPiece, targetOpt.get)) {
                   log.info("A piece of the same type occupies the target space: can't move there!")
-                  false
+                  NotValidated
                 } else {
 
                   // is there a piece of the opposite type that is protected?
                   if (targetOpt.isDefined && isProtected(targetOpt.get, board)) {
                     log.info("Target piece is protected: can't dance with _her_!")
-                    false
+                    NotValidated
                   } else {
 
                     if (rangeContainsTripletOfOpposingType(movingPiece.position, targetPosition, movingPiece, board)) {
                       log.info("Can't jump of triplet of opposing player!")
-                      false
+                      NotValidated
                     } else {
-                      true
+                      Validated
                     }
                   }
                 }
@@ -106,7 +110,7 @@ object Rules {
 
           case None =>
             log.error(s"No piece found at position $position")
-            false
+            NotValidated
         }
 
 
@@ -145,7 +149,7 @@ object Rules {
 //                    (1, p.position)
 //              })._1 < 3)
 
-      case _ => true
+      case _ => NotValidated
     }
 
   }
@@ -193,6 +197,13 @@ object Rules {
   }
 
 }
+
+sealed trait ValidationResult
+case object Validated extends ValidationResult
+case object ValidatedNoMove extends ValidationResult
+case object NotValidated extends ValidationResult
+
+
 
 object TempLogger {
 
