@@ -84,14 +84,14 @@ class RulesSpec extends Specification {
     }
     "be legal for any throw for the drowning piece even if it is not 2 (but the board should not change)" in {
       val board = Board(Seq(cone(1), reel(2), cone(3), reel(4), cone(5), cone(7), cone(8), reel(9), reel(11), reel(22), reel(27)))
-      Rules.play(PieceMove(Rules.SeaOfHumiliation, 1), board) must beSome(board)
-      Rules.play(PieceMove(Rules.SeaOfHumiliation, 6), board) must beSome(board)
-      Rules.play(PieceMove(Rules.SeaOfHumiliation, 3), board) must beSome(board)
+      Rules.play(PieceMove(Rules.seaOfHumiliation, 1), board) must beSome(board)
+      Rules.play(PieceMove(Rules.seaOfHumiliation, 6), board) must beSome(board)
+      Rules.play(PieceMove(Rules.seaOfHumiliation, 3), board) must beSome(board)
     }
     "be legal to move the drowning piece on a move of 2" in {
-      val board =         Board(Seq(cone(1), reel(2), cone(3), reel(4), cone(5), cone(7), cone(8), reel(9), reel(11), reel(22), reel(27)))
-      val expectedBoard = Board(Seq(cone(1), reel(2), cone(3), reel(4), cone(5), cone(7), cone(8), reel(9), reel(11), reel(15), reel(27)))
-      Rules.play(PieceMove(Rules.SeaOfHumiliation, 2), board) must beSome[Board](expectedBoard)
+      val board =         Board(Seq(cone(1), reel(2), cone(3), reel(4), cone(5), cone(7), cone(8), reel(11), reel(22), reel(27)))
+      val expectedBoard = Board(Seq(cone(1), reel(2), cone(3), reel(4), cone(5), cone(7), cone(8), reel(11), reel(15), reel(22)))
+      Rules.play(PieceMove(Rules.seaOfHumiliation, 2), board) must beSome[Board](expectedBoard)
     }
     "move the drowning piece in the next available space when the recovery space is occupied" in {
       ko

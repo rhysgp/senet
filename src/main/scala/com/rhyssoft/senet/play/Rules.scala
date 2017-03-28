@@ -6,6 +6,8 @@ package com.rhyssoft.senet.play
 
 import com.rhyssoft.senet.state.{Board, Piece}
 
+import scala.annotation.tailrec
+
 /**
  * The rules of the game.
  *
@@ -24,7 +26,8 @@ object Rules {
 
   private val protectedSpaces = Seq(26, 28, 29)
 
-  val SeaOfHumiliation = 27
+  val seaOfHumiliation = 27
+  val escapePosition = 15
 
   def initialBoard(move: Move, board: Board): Option[Board] = {
     Some(Board(
@@ -39,17 +42,27 @@ object Rules {
 
   def play(move: Move, board: Board): Option[Board] = {
 
-    validate(move, board) match {
-      case Validated =>
-        Some(moveIt(move, board))
-      case ValidatedNoMove =>
+    move match {
+      case pm: PieceMove =>
+        validate(pm, board) match {
+          case ValidatedMove =>
+            Some(moveIt(pm, board))
+          case ValidatedDance =>
+            Some(dance(pm, board))
+          case ValidatedEscapeSeaOfHumiliation =>
+            Some(escapeSeeOfHumiliation(board))
+          case ValidatedNoMove =>
+            Some(board)
+          case NotValidated(msg) =>
+            None
+        }
+      case NullMove =>
         Some(board)
-      case NotValidated =>
-        None
     }
+
   }
 
-  private[play] def moveIt(move: Move, board: Board): Board = {
+  private[play] def moveIt(move: PieceMove, board: Board): Board = {
     move match {
       case PieceMove(pieceAtPos, spaces) =>
         val piecesOpts = board.pieces.map(Option(_))
@@ -61,12 +74,39 @@ object Rules {
           .flatten
           .sortBy(_.position)
         Board(sorted)
-      case NullMove =>
-        board
     }
   }
 
-  def validate(move: Move, board: Board): ValidationResult = {
+  private def dance(move: PieceMove, board: Board): Board = {
+    val sourcePosition = move.pieceAtPosition
+    val targetPosition = move.pieceAtPosition + move.spaces
+
+    val byStanders = board.pieces.filterNot(p => p.position == sourcePosition || p.position == targetPosition)
+    val sourcePiece = board.pieceAt(sourcePosition).get
+    val targetPiece = board.pieceAt(targetPosition).get
+
+    val newOrder = (byStanders :+ sourcePiece.copy(position = targetPosition) :+ targetPiece.copy(position = sourcePosition)).sortBy(_.position)
+
+    board.copy(pieces = newOrder)
+  }
+
+  private def escapeSeeOfHumiliation(board: Board): Board = {
+    val byStanders = board.pieces.filterNot(_.position == seaOfHumiliation)
+    val drowningPiece = board.pieceAt(seaOfHumiliation).get
+    val newPosition = emptyEscapePosition(board, escapePosition)
+    val newOrder = (byStanders :+ drowningPiece.copy(position = newPosition)).sortBy(_.position)
+    board.copy(pieces = newOrder)
+  }
+
+  @tailrec
+  private def emptyEscapePosition(board: Board, pos: Int): Int = {
+    board.pieceAt(pos) match {
+      case Some(_) => emptyEscapePosition(board, pos - 1)
+      case None => pos
+    }
+  }
+
+  def validate(move: PieceMove, board: Board): ValidationResult = {
 
     move match {
       case PieceMove(position, spaces) =>
@@ -77,33 +117,43 @@ object Rules {
         movingPieceOpt match {
           case Some(movingPiece) =>
             if (pieceIsDrowning(movingPiece)) {
-              log.debug("Piece is drowning: any throw is valid, but the board may not change.")
-              ValidatedNoMove
+
+              if (move.spaces == 2) {
+                log.debug("Piece is drowning: escaped Sea of Humiliation with a throw of 2.")
+                ValidatedEscapeSeaOfHumiliation
+              } else {
+                log.debug(s"Piece is drowning: any throw is valid, but the board won't change on a throw of ${move.spaces}.")
+                ValidatedNoMove
+              }
             } else {
 
               // piece is not drowning, continue validation:
               if (playerIsDrowning(movingPieceOpt.get, board)) {
                 log.info("Player is drowning: can't move _that_ piece!")
-                NotValidated
+                NotValidated("Player is drowning: can't move _that_ piece!")
 
               } else {
                 // is there a piece of the same type in the target?
                 if (targetOpt.isDefined && areSameType(movingPiece, targetOpt.get)) {
                   log.info("A piece of the same type occupies the target space: can't move there!")
-                  NotValidated
+                  NotValidated("A piece of the same type occupies the target space: can't move there!")
                 } else {
 
                   // is there a piece of the opposite type that is protected?
-                  if (targetOpt.isDefined && isProtected(targetOpt.get, board)) {
-                    log.info("Target piece is protected: can't dance with _her_!")
-                    NotValidated
+                  if (targetOpt.isDefined) {
+                    if (isProtected(targetOpt.get, board)) {
+                      log.info("Target piece is protected: can't dance with _her_!")
+                      NotValidated("Target piece is protected: can't dance with _her_!")
+                    } else {
+                      log.debug("Validated dance!")
+                      ValidatedDance
+                    }
                   } else {
-
                     if (rangeContainsTripletOfOpposingType(movingPiece.position, targetPosition, movingPiece, board)) {
                       log.info("Can't jump of triplet of opposing player!")
-                      NotValidated
+                      NotValidated("Can't jump of triplet of opposing player!")
                     } else {
-                      Validated
+                      ValidatedMove
                     }
                   }
                 }
@@ -112,56 +162,20 @@ object Rules {
 
           case None =>
             log.error(s"No piece found at position $position")
-            NotValidated
+            NotValidated(s"No piece found at position $position")
         }
 
-
-//        /*
-//         * 1. There's a piece at the point in the move:
-//         */
-//        movingPieceOpt.isDefined &&
-//          /*
-//           * 2. A piece fallen into the Sea of Humiliation drowns the player: no other moves can be made except
-//           * on the piece that fell in; but any throw is valid, even if it doesn't result in a move.
-//           */
-//          pieceIsDrowning(movingPieceOpt.get) ||
-//            /*
-//             * 2b. If any other piece is drowning, the moving piece can't be moved:
-//             */
-//            (!playerIsDrowning(movingPieceOpt.get, board) &&
-//              /*
-//               * 3. The target space is occupied either by nothing or by a piece of the opposite type:
-//               */
-//              (targetOpt.isEmpty || !areSameType(targetOpt, movingPieceOpt)) &&
-//              /*
-//               * 4. A piece cannot be danced when accompanied by a fellow (either one before or one after):
-//               */
-//              (targetOpt.isEmpty || !(areSameType(targetOpt, targetPlus1Opt) || areSameType(targetOpt, targetMinus1Opt))) &&
-//              /*
-//               * 5. A piece cannot jump over three consecutive opponent pieces:
-//               */
-//              board.pieces
-//                .filter(p => p.position > position && p.position < position + spaces)
-//                .filter(p => !areSameType(p, movingPieceOpt.get))
-//                .foldLeft((0, 0))((acc, p) => acc match {
-//                case (consecutiveCount, lastPos) =>
-//                  if (p.position == lastPos + 1)
-//                    (consecutiveCount + 1, p.position)
-//                  else
-//                    (1, p.position)
-//              })._1 < 3)
-
-      case _ => NotValidated
+      case _ => ValidatedNoMove
     }
 
   }
 
   private def playerIsDrowning(piece: Piece, board: Board): Boolean = {
-    board.pieceAt(SeaOfHumiliation).exists(areSameType(_, piece))
+    board.pieceAt(seaOfHumiliation).exists(areSameType(_, piece))
   }
 
   private def pieceIsDrowning(piece: Piece): Boolean = {
-    piece.position == SeaOfHumiliation
+    piece.position == seaOfHumiliation
   }
 
   private def areSameType(p1: Piece, p2: Piece): Boolean = p1.pieceType == p2.pieceType
@@ -193,9 +207,12 @@ object Rules {
 }
 
 sealed trait ValidationResult
-case object Validated extends ValidationResult
+case object ValidatedMove extends ValidationResult
+case object ValidatedDance extends ValidationResult
 case object ValidatedNoMove extends ValidationResult
-case object NotValidated extends ValidationResult
+case object ValidatedEscapeSeaOfHumiliation extends ValidationResult
+case class NotValidated(reason: String) extends ValidationResult
+
 
 //sealed trait MoveResult
 //case object Moved(nextPlayer: )
