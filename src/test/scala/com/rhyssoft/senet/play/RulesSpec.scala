@@ -94,16 +94,24 @@ class RulesSpec extends Specification {
       Rules.play(PieceMove(Rules.seaOfHumiliation, 2), board) must beSome[Board](expectedBoard)
     }
     "move the drowning piece in the next available space when the recovery space is occupied" in {
-      ko
+      val board =         Board(Seq(cone(1), reel(2), cone(3), reel(4), cone(5), cone(7), cone(8), reel(15), reel(22), reel(27)))
+      val expectedBoard = Board(Seq(cone(1), reel(2), cone(3), reel(4), cone(5), cone(7), cone(8), reel(14), reel(15), reel(22)))
+      Rules.play(PieceMove(Rules.seaOfHumiliation, 2), board) must beSome[Board](expectedBoard)
     }
     "move the drowning piece in the next available space when the recovery space is occupied x 2" in {
-      ko
+      val board =         Board(Seq(cone(1), reel(2), cone(3), reel(4), cone(5), cone(7), cone(14), reel(15), reel(22), reel(27)))
+      val expectedBoard = Board(Seq(cone(1), reel(2), cone(3), reel(4), cone(5), cone(7), reel(13), cone(14), reel(15), reel(22)))
+      Rules.play(PieceMove(Rules.seaOfHumiliation, 2), board) must beSome[Board](expectedBoard)
     }
     "move the drowning piece in the next available space when the recovery space is occupied x 3" in {
-      ko
+      val board =         Board(Seq(cone(1), reel(2), cone(3), reel(4), cone(5), cone(13), cone(14), reel(15), reel(22), reel(27)))
+      val expectedBoard = Board(Seq(cone(1), reel(2), cone(3), reel(4), cone(5), reel(12), cone(13), cone(14), reel(15), reel(22)))
+      Rules.play(PieceMove(Rules.seaOfHumiliation, 2), board) must beSome[Board](expectedBoard)
     }
     "move the drowning piece in the next available space when the recovery space is occupied x 4" in {
-      ko
+      val board =         Board(Seq(cone(1), reel(2), cone(3), reel(4), cone(12), cone(13), cone(14), reel(15), reel(22), reel(27)))
+      val expectedBoard = Board(Seq(cone(1), reel(2), cone(3), reel(4), reel(11), cone(12), cone(13), cone(14), reel(15), reel(22)))
+      Rules.play(PieceMove(Rules.seaOfHumiliation, 2), board) must beSome[Board](expectedBoard)
     }
   }
 }
