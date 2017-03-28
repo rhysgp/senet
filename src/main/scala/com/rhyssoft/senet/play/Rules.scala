@@ -9,14 +9,15 @@ import com.rhyssoft.senet.state.{Board, Piece}
 import scala.annotation.tailrec
 
 /**
- * The rules of the game.
- *
- * TODO: work out the statistics of getting each throw (1, 2, 3, 4, 6)
- *
- *
- *
- * @author Rhys Parsons
- */
+  * The rules of the game.
+  *
+  * @todo work out the statistics of getting each throw (1, 2, 3, 4, 6)
+  * @todo The possible results of a play are: IllegalMove, MoveApplied, GameOver
+  * @todo On playing a move, whose turn is next should also be returned.
+  *
+  *
+  * @author Rhys Parsons
+  */
 object Rules {
 
   type Play = (Move, Board) => Option[Board]
